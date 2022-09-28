@@ -117,6 +117,12 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
+#pyCharm
+.idea/
+
+
+
+
 # mkdocs documentation
 /site
 
