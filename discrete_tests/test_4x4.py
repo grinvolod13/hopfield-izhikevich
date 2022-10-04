@@ -1,24 +1,27 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import net
+import hopfield
 
-n = net.Net()
+n = hopfield.Hopfield()
 
 learn_data = np.array(
-    [[1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-     [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1],
+    [[1.0, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+     [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1]])
+
+""",
      [-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1],
-     [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1]])
+     [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1]
+"""
 
-inp = np.array([1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1])
-
-n.memorize(learn_data)
-
+inp = np.array([1, 1, 1, 1, 1, -1, -1, -1, -1, -1, 1, -1, 1, -1, -1, -1],np.float64)
 print(inp)
 plt.imshow([inp])
 plt.show()
 
-out = [n.work_mode(inp)]
+t, out = n.start(learn_data, inp)
+
+print("t:", t)
 print(out)
-plt.imshow(out)
+
+plt.imshow([out])
 plt.show()
