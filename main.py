@@ -5,35 +5,52 @@ import matplotlib.pyplot as plt
 import net
 
 
+def f_none(s):
+    return float(s)
+
+def draw(mas):
+    a, b = mas.shape
+    for i in range(a):
+        for j in range(b):
+            if mas[i][j]>0.5:
+                print('#', end='',sep='')
+            else:
+                print(' ', end='', sep='')
+
+
 h = net.Net()
 
 # training
 l = []
-img = 0
-for i in range(4):
-    img = cv2.imread("data/train/num/"+str(i)+'.png',cv2.IMREAD_GRAYSCALE)
-    l.append(1 - img.flatten()*2/255.0)
+img = None
+for i in range(8):
+    img = cv2.imread("data/train/fig/" + str(i) + '.png', cv2.IMREAD_GRAYSCALE) / 255.0
+    img[img > 0.5] = 1.0
+    img[img <= 0.5] = -1.0
+    img = -img
+    # plt.imshow(img)
+    # plt.show()
+    l.append(img.flatten())
 
-l = np.array(l,np.float64)
+l = np.array(l)
 print("memorising...")
 h.memorize(l)
 
-
-
 # read and process image
-inp = 1 - cv2.imread("data/train/num/0.png",cv2.IMREAD_GRAYSCALE).flatten()*2/255.0
-print("processing data...")
-out = h.work_mode(inp, 100)
-
-
-# shows out image
-img_out = (out).reshape(20,20)
-plt.imshow(img_out)
+inp = cv2.imread("data/train/fig/5.png", cv2.IMREAD_GRAYSCALE) / 255.0
+# cv2.imshow("img",inp)
+inp[inp >= 0.5] = 1.0
+inp[inp <= 0.6] = -1.0
+inp = -inp
+plt.imshow(inp)
 plt.show()
 
+print("processing data...")
+out = h.work_mode(inp.flatten(), 1000).reshape(20, 20)
 
+# shows out image
 
+plt.imshow(out)
+plt.show()
 # print(out)
 # print(hopf._Net__W)
-
-

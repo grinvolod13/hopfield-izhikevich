@@ -1,11 +1,22 @@
-
 import numpy as np
+import matplotlib.pyplot as plt
+
+
+def f_basic(s):
+    if s > 0:
+        return 1.0
+    else:
+        return -1.0
+
+
+
 
 class Net:
 
     def __init__(self):
         self.__N = 0
         self.__M = 0
+        self.i = 0
         # self.__S
         # self.__W
         # self.__image
@@ -14,65 +25,51 @@ class Net:
         (M, N) = train_set.shape
         self.__N = N
         self.__M = M
-        self.W = np.zeros((N, N),np.float64)
-        self.S = np.zeros(N,np.float64)
+        self.W = np.zeros((N, N))
+        self.S = np.zeros(N)
         self.image = train_set
 
-        # for i in range(N):
-        #     print(i)
-        #     for j in range(N):
-        #         if i == j:
-        #             continue
-        #         sum = 0.0
-        #         for k in range(M):
-        #             sum += self.image[k][i] * self.image[k][j]
-        #         self.W[i][j] = sum / float(N)
         for i in range(M):
-            self.W+=np.outer(self.image[i].T,self.image[i])
-        self.W/=float(N)
+            self.W += np.outer(self.image[i], self.image[i].T)
+        self.W /= np.float64(N)
         for i in range(N):
-            self.W[i][i]=0.0
+            self.W[i][i] = 0.0
 
-    @staticmethod
-    def f_basic(s):
-        if s > 0:
-            return 1.0
-        elif s < 0:
-            return -1.0
-        else:
-            return 0.0
-    @staticmethod
-    def f_none(s):
-        return float(s)
+    def process(self, func=None):
+        if func == None:
+            func = f_basic
 
+        self.S[self.S >= 1.0] = 1.0
+        self.S[self.S <= -1.0] = -1.0
 
-    def process(self):
-        self.S = np.array([i for i in map(self.f_basic, self.S.dot(self.W))])
-        return self.S
+        self.S = np.array([i for i in map(func, np.dot(self.W, self.S))])
+        print(self.i)
+        self.i+=1
+        plt.title(str(self.i))
+        plt.imshow(self.S.reshape(20,20))
+        plt.show()
 
-    def is_image(self, X):
-        for i in range(self.__M):
-            if (X == self.image[i]).all():
-                print("is image: ",X)
-                return True
-        return False
+        self.S[self.S >= 1.0] = 1.0
+        self.S[self.S <= -1.0] = -1.0
 
-    def work_mode(self, X, t: int):
-        self.S = X.copy()
+        return self.S.copy()
+
+    def work_mode(self, X, t: int = 1000, func=None):
+        self.S = np.copy(X)
         b = False
         for i in range(t):
-            X = self.S.copy()
-            self.process()
-            if (X == self.S).all() and self.is_image(self.S):
+            X = np.copy(self.S)
+            self.process(func)
+
+            if (X == self.S).all() and i>=2:
                 if b:
-                    print("t:", i+1)
-                    print(self.S)
+                    print("t:", i + 1)
                     return self.S
                 else:
                     b = True
             else:
                 b = False
 
-        print("timeout:",t)
+        print("timeout:", t)
 
-        return self.S
+        return self.S.copy()
