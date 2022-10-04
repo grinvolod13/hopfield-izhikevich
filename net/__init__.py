@@ -42,12 +42,12 @@ class Net:
         self.S[self.S >= 1.0] = 1.0
         self.S[self.S <= -1.0] = -1.0
 
-        self.S = np.array([i for i in map(func, np.dot(self.W, self.S))])
-        print(self.i)
-        self.i+=1
-        plt.title(str(self.i))
-        plt.imshow(self.S.reshape(20,20))
-        plt.show()
+        self.S = np.array([i for i in map(func, np.dot(self.W, self.S.T)/np.float64(self.__N))])
+        # print(self.i)
+        # self.i+=1
+        # plt.title(str(self.i))
+        # plt.imshow(self.S.reshape(20,20))
+        # plt.show()
 
         self.S[self.S >= 1.0] = 1.0
         self.S[self.S <= -1.0] = -1.0

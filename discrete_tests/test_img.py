@@ -46,7 +46,7 @@ plt.imshow(inp)
 plt.show()
 
 print("processing data...")
-out = h.work_mode(inp.flatten(), 1000).reshape(20, 20)
+out = h.work_mode(inp.flatten()).reshape(20, 20)
 
 # shows out image
 
