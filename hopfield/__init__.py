@@ -36,10 +36,10 @@ class Hopfield:
     def iteration(self):
         """
         S(t+1) = F(S(t), H(t))
-        H(t+1) = W*G(S(t+1)) * 1/n
+        H(t+1) = G(S(t+1)) * W * 1/n
         """
         self.S = self.f(self.S, self.H).copy()
-        self.H = np.dot(self.g(self.S),self.W) / len(self.S)
+        self.H = np.dot(self.g(self.S), self.W) / len(self.S)
 
     def memorisation(self, images: np.ndarray):
         self.W = np.zeros((images.shape[1], images.shape[1]), np.float64)

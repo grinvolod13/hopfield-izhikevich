@@ -3,7 +3,6 @@ q = 0.4
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-
 import hopfield
 
 
@@ -30,7 +29,6 @@ def f_none(s):
     return float(s)
 
 
-
 n = hopfield.Hopfield(f)
 
 l = []
@@ -50,7 +48,6 @@ inp = cv2.imread("C:\\Users\\User\\Desktop\\hopfield-classic\\data\\train\\num\\
 inp[inp >= 0.5] = 1.0
 inp[inp <= 0.6] = -1.0
 inp = -inp
-
 
 t, out = n.start(l, inp.flatten(), 250)
 
