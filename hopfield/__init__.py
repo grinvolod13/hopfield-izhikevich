@@ -36,15 +36,15 @@ class Hopfield:
     def iteration(self):
         """
         S(t+1) = F(S(t), H(t))
-        H(t+1) = G(W*S(t+1)*1/n)
+        H(t+1) = W*G(S(t+1)) * 1/n
         """
         self.S = self.f(self.S, self.H).copy()
-        self.H = self.g(np.dot(self.W, self.S) / len(self.S)).copy()
+        self.H = np.dot(self.g(self.S),self.W) / len(self.S)
 
     def memorisation(self, images: np.ndarray):
         self.W = np.zeros((images.shape[1], images.shape[1]), np.float64)
         for i in range(images.shape[0]):
-            self.W += np.outer(images[i], images[i].T)
+            self.W += np.outer(images[i], images[i])
 
         np.fill_diagonal(self.W, 0.0)
 
@@ -61,7 +61,7 @@ class Hopfield:
         self.memorisation(images)
 
         self.H = X.copy()
-        self.S = X.copy()
+        self.S = np.zeros_like(self.H)
         for i in range(t):
 
             self.iteration()
