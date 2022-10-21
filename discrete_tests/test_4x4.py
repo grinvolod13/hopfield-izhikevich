@@ -8,17 +8,17 @@ learn_data = np.array(
     [[1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
      [-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1]], np.float64)
 
-plt.imshow([learn_data[0]])
-plt.show()
-plt.imshow([learn_data[1]])
-plt.show()
+# plt.imshow([learn_data[0]])
+# plt.show()
+# plt.imshow([learn_data[1]])
+# plt.show()
 
 inp = np.array([1, 1, 1, 1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, 1], np.float64)
 print(inp)
 plt.imshow([inp])
 plt.show()
 
-t, out = n.start(learn_data, inp, 10000)
+t, out = n.start(learn_data, inp, 250)
 
 print("t:", t)
 print(out)

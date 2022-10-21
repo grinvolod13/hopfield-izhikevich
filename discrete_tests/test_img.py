@@ -23,25 +23,20 @@ h = hopfield.Hopfield()
 
 l = []
 img = None
-for i in range(8):
-    img = cv2.imread('C:\\Users\\User\\Desktop\\hopfield-classic\\data\\train\\num\\' + str(i) + '.png', cv2.IMREAD_GRAYSCALE) / 255.0
-    img[img > 0.5] = 1.0
-    img[img <= 0.5] = -1.0
-    img = -img
+for i in range(10):
+    img = np.where(cv2.imread('../data/train/num/' + str(i) + '.png', cv2.IMREAD_GRAYSCALE) < 127, 1.0, -1.0)
     l.append(img.flatten())
 
 l = np.array(l)
 
 # read and process image
-inp = cv2.imread("C:\\Users\\User\\Desktop\\hopfield-classic\\data\\train\\num\\9.png", cv2.IMREAD_GRAYSCALE) / 255.0
-inp[inp >= 0.5] = 1.0
-inp[inp <= 0.6] = -1.0
-inp = -inp
+inp = np.where(cv2.imread("../data/train/num/4.png", cv2.IMREAD_GRAYSCALE) < 127, 1.0, -1.0)
+
 
 plt.imshow(inp)
 plt.show()
 
-t,out = h.start(l, inp.flatten())
+t, out = h.start(l, inp.flatten())
 
 # shows out image
 print(t)
