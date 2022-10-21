@@ -1,5 +1,5 @@
 import numpy as np
-
+from tqdm import tqdm
 
 class Hopfield:
 
@@ -9,7 +9,7 @@ class Hopfield:
         S - вектор внутрішнього стану нейрону,
         W - матриця звязків нейронів,
         F - фукнція переходу нейрона, S(t+1) = F(S(t), H(t)) ,
-        G - функція активації виходу нейрона, H(t+1) = G(W*S(t+1)*1/n)
+        G - функція активації виходу нейрона, H(t+1) = W @ S(t+1)*1/n
         """
         self.H = np.array([], np.float64)
         self.S = np.array([], np.float64)
@@ -17,8 +17,7 @@ class Hopfield:
 
         if f is None:
             f = self.f_basic
-        if g is None:
-            g = self.g_basic
+
 
         self.f = np.vectorize(f)
         self.g = np.vectorize(g)
@@ -36,24 +35,24 @@ class Hopfield:
     def iteration(self):
         """
         S(t+1) = F(S(t), H(t))
-        H(t+1) = G(S(t+1)) * W * 1/n
+        H(t+1) = S(t+1) @ W/n
         """
-        self.S = self.f(self.S, self.H).copy()
-        self.H = np.dot(self.g(self.S), self.W) / len(self.S)
+        self.H = self.H @ self.W  # прохід ваг
+        self.S = self.f(self.S, self.H)  # активація нейронів
+        self.H = self.S.copy()
 
     def memorisation(self, images: np.ndarray):
         self.W = np.zeros((images.shape[1], images.shape[1]), np.float64)
         for i in range(images.shape[0]):
             self.W += np.outer(images[i], images[i])
-
-        np.fill_diagonal(self.W, 0.0)
+        np.fill_diagonal(self.W, 0)
 
         self.W /= images.shape[1]  # w/=n
 
         self.H = np.zeros(images.shape[1], np.float64)
         self.S = np.zeros(images.shape[1], np.float64)
 
-    def start(self, images, X: np.array, t: int = 1000):
+    def start(self, images, X: np.array, t: int = 250):
         X = np.array(X)
         if images.shape[1] != len(X):
             raise ValueError
@@ -62,11 +61,10 @@ class Hopfield:
 
         self.H = X.copy()
         self.S = np.zeros_like(self.H)
-        for i in range(t):
-
+        for i in tqdm(range(t)):
             self.iteration()
-            if (self.S == X).all() and i > 0:  # перевірка зміни внутрішнього стану з минулої ітерації
-                return i, self.S
-            X = self.S.copy()
+            if (self.H == X).all() and i > 0:  # перевірка зміни виходу з минулої ітерації
+                return i, self.H.copy()
+            X = self.H.copy()
 
-        return t, self.S
+        return t, self.H.copy()
