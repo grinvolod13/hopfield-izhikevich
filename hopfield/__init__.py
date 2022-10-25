@@ -1,9 +1,8 @@
 import numpy as np
 from tqdm import tqdm
-
-
-def vectorize(func):
-    return np.vectorize(func)
+from PIL import Image
+import matplotlib.pyplot as plt
+import cv2
 
 
 class Hopfield:
@@ -17,49 +16,55 @@ class Hopfield:
         """
         self.q = q
         self.f = np.vectorize(self.f)
-        self.H = np.array([], float)
-        self.S = np.array([], float)
-        self.W = np.array([], float)
+        self.H = np.array([], np.float16)
+        self.S = np.array([], np.float16)
+        self.W = np.array([], np.float16)
+        self.gif = []
 
-    def iterate(self, mode="async", q=0.0):
+    def iterate(self, mode="sync", q=0):
         """
         S(t+1) = F(S(t), H(t))
         """
         if mode == "sync":
-            self.H = self.W @ self.H  # прохід ваг
-            self.S = self.f(self.S, self.H, self.q)  # активація нейронів
+            self.S = self.f(self.S, self.S @ self.W, q)  # активація нейронів
         else:
-            order = np.arange(len(self.H))
+            order = np.arange(len(self.S))
             np.random.shuffle(order)
             for i in order:
-                inp_i = self.H @ self.W[i]
-                self.S[i] = self.f(self.S[i], inp_i, q)
-                self.H[i] = self.S[i]
+                self.S[i] = self.f(self.S[i], self.S @ self.W[i], q).clip(-1,1)
 
-    def train(self, images: np.ndarray):
-        images = np.array(images, float)
-        self.W = np.zeros((images.shape[1], images.shape[1]), float)
-
+    def train(self, images: np.ndarray, zeroDiagonal=True):
+        images = np.array(images, np.float16)
         self.W = images.T @ images
-        np.fill_diagonal(self.W, 0)
+        if zeroDiagonal:
+            np.fill_diagonal(self.W, 0)
         self.W /= images.shape[1]  # w/=n
 
-    def run(self, X: np.array, time: int = 250, mode="async", q=None):
+        self.S = np.zeros(self.W.shape[0])
+
+    def run(self, X: np.array, time: int = 250, mode="sync", q=None, animate=None, notS=False):
         if q is None:
             q = self.q
-        X = np.array(X)
+        if type(X) != np.ndarray:
+            X = np.array(X)
         if self.W.shape[1] != len(X):
             raise ValueError
-        self.S = np.zeros(len(X), float)
+        if notS:
+            self.S = np.random.randint(0, 2, len(X))*2-1
+        else:
+            self.S = X.copy()
 
-        self.H = X.copy()
+        if animate:
+            self.gif = [np.ceil(self.S * 127 + 127).reshape(animate, animate)]
+
         for i in range(time):
             self.iterate(mode, q)
-            if (self.H == X).all() and i > 0:  # перевірка зміни виходу з минулої ітерації
-                return i, self.H.copy()
-            X = self.H.copy()
-
-        return time, self.H.copy()
+            if animate:
+                self.gif.append(np.ceil(self.S * 127 + 127).reshape(animate, animate))
+            if (self.S == X).all() and i > 0:  # перевірка зміни виходу з минулої ітерації
+                return i, self.S
+            X = self.S.copy()
+        return time, self.S
 
     @staticmethod
     def f(s, h, q):
