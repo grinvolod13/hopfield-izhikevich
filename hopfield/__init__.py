@@ -4,6 +4,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import cv2
 
+ 
 
 class Hopfield:
 
@@ -28,10 +29,10 @@ class Hopfield:
         if mode == "sync":
             self.S = self.f(self.S, self.S @ self.W, q)  # активація нейронів
         else:
-            order = np.arange(len(self.S))
+            order = np.arange(float(self.S.shape[0])) # type: ignore
             np.random.shuffle(order)
             for i in order:
-                self.S[i] = self.f(self.S[i], self.S @ self.W[i], q).clip(-1,1)
+                self.S[i] = self.f(self.S[i], self.S @ self.W[i], q).clip(-1,1) # type: ignore
 
     def train(self, images: np.ndarray, zeroDiagonal=True):
         images = np.array(images, np.float16)
@@ -42,7 +43,7 @@ class Hopfield:
 
         self.S = np.zeros(self.W.shape[0])
 
-    def run(self, X: np.array, time: int = 250, mode="sync", q=None, animate=None, notS=False):
+    def run(self, X: np.ndarray, time: int = 250, mode="sync", q=None, animate=None, notS=False):
         if q is None:
             q = self.q
         if type(X) != np.ndarray:
@@ -58,7 +59,7 @@ class Hopfield:
             self.gif = [np.ceil(self.S * 127 + 127).reshape(animate, animate)]
 
         for i in range(time):
-            self.iterate(mode, q)
+            self.iterate(mode, int(q))
             if animate:
                 self.gif.append(np.ceil(self.S * 127 + 127).reshape(animate, animate))
             if (self.S == X).all() and i > 0:  # перевірка зміни виходу з минулої ітерації
