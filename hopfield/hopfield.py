@@ -2,13 +2,11 @@ import numpy as np
 from tqdm import tqdm
 from PIL import Image
 import matplotlib.pyplot as plt
-# import cv2
 
- 
 
 class Hopfield:
 
-    def __init__(self, q=0.0):
+    def __init__(self, np_type=np.float32, q=0.0):
         """
         H - вектор вхідних збуджень системи,
         S - вектор внутрішнього стану нейрону,
@@ -16,11 +14,13 @@ class Hopfield:
         F - фукнція переходу нейрона, S(t+1) = F(S(t), H(t)) ,
         """
         self.q = q
+        self.np_type = np_type
         self.f = np.vectorize(self.f)
-        self.H = np.array([], np.float16)
-        self.S = np.array([], np.float16)
-        self.W = np.array([], np.float16)
+        self.H = np.array([], self.np_type)
+        self.S = np.array([], self.np_type)
+        self.W = np.array([], self.np_type)
         self.gif = []
+        
 
     def iterate(self, mode="sync", q=0):
         """
@@ -35,7 +35,7 @@ class Hopfield:
                 self.S[i] = self.f(self.S[i], self.S @ self.W[i], q).clip(-1,1) # type: ignore
 
     def train(self, images: np.ndarray, zeroDiagonal=True):
-        images = np.array(images, np.float16)
+        images = np.array(images, self.np_type)
         self.W = images.T @ images
         if zeroDiagonal:
             np.fill_diagonal(self.W, 0)
@@ -60,13 +60,16 @@ class Hopfield:
 
         for i in range(time):
             self.iterate(mode, int(q))
+            
             if animate:
                 self.gif.append(np.ceil(self.S * 127 + 127).reshape(animate, animate))
-            if (self.S == X).all() and i > 0:  # перевірка зміни виходу з минулої ітерації
                 
-                return {"time": i, time"output":self.S}
+            if (self.S == X).all() and i > 0:  # перевірка зміни виходу з минулої ітерації
+                return {"time": i, "timeout": False, "output":self.S}
+            
             X = self.S.copy()
-        return time, self.S
+            
+        return {"time": i, "timeout": True, "output":self.S}
 
     @staticmethod
     def f(s, h, q):
