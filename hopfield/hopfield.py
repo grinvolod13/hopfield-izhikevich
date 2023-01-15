@@ -2,7 +2,7 @@ import numpy as np
 from tqdm import tqdm
 from PIL import Image
 import matplotlib.pyplot as plt
-import cv2
+# import cv2
 
  
 
@@ -63,7 +63,8 @@ class Hopfield:
             if animate:
                 self.gif.append(np.ceil(self.S * 127 + 127).reshape(animate, animate))
             if (self.S == X).all() and i > 0:  # перевірка зміни виходу з минулої ітерації
-                return i, self.S
+                
+                return {"time": i, time"output":self.S}
             X = self.S.copy()
         return time, self.S
 
