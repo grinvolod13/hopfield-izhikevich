@@ -2,11 +2,13 @@ import numpy as np
 from tqdm import tqdm
 from PIL import Image
 import matplotlib.pyplot as plt
+import random
+import copy
 
 
 class Hopfield:
 
-    def __init__(self, np_type=np.float32, q=0.0):
+    def __init__(self, np_type=np.float16, q=0.0):
         """
         H - вектор вхідних збуджень системи,
         S - вектор внутрішнього стану нейрону,
@@ -35,19 +37,22 @@ class Hopfield:
                 self.S[i] = self.f(self.S[i], self.S @ self.W[i], q).clip(-1,1) # type: ignore
 
     def train(self, images: np.ndarray, zeroDiagonal=True):
-        images = np.array(images, self.np_type)
+        # images = np.array(images, self.np_type)
+        images = copy.deepcopy(images)
+        random.shuffle(images)
         self.W = images.T @ images
         if zeroDiagonal:
             np.fill_diagonal(self.W, 0)
         self.W /= images.shape[1]  # w/=n
 
-        self.S = np.zeros(self.W.shape[0])
+        self.S = np.zeros(self.W.shape[0], dtype=self.np_type)
 
     def run(self, X: np.ndarray, time: int = 250, mode="sync", q=None, animate=None, notS=False):
         if q is None:
             q = self.q
-        if type(X) != np.ndarray:
-            X = np.array(X)
+            
+        X = np.array(X, dtype=self.np_type)
+        
         if self.W.shape[1] != len(X):
             raise ValueError
         if notS:
@@ -59,7 +64,7 @@ class Hopfield:
             self.gif = [np.ceil(self.S * 127 + 127).reshape(animate, animate)]
 
         for i in range(time):
-            self.iterate(mode, int(q))
+            self.iterate(mode, q)
             
             if animate:
                 self.gif.append(np.ceil(self.S * 127 + 127).reshape(animate, animate))
@@ -67,7 +72,7 @@ class Hopfield:
             if (self.S == X).all() and i > 0:  # перевірка зміни виходу з минулої ітерації
                 return {"time": i, "timeout": False, "output":self.S}
             
-            X = self.S.copy()
+            X = self.S
             
         return {"time": i, "timeout": True, "output":self.S}
 
