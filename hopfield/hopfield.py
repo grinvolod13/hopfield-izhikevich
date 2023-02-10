@@ -38,8 +38,6 @@ class Hopfield:
 
     def train(self, images: np.ndarray, zeroDiagonal=True):
         # images = np.array(images, self.np_type)
-        images = copy.deepcopy(images)
-        random.shuffle(images)
         self.W = images.T @ images
         if zeroDiagonal:
             np.fill_diagonal(self.W, 0)
@@ -51,12 +49,13 @@ class Hopfield:
         if q is None:
             q = self.q
             
-        X = np.array(X, dtype=self.np_type)
+        X = X.copy()
         
         if self.W.shape[1] != len(X):
             raise ValueError
         if notS:
-            self.S = np.random.randint(0, 2, len(X))*2-1
+            # self.S = np.random.randint(0, 2, len(X))*2-1
+            self.S = np.zeros_like(X)
         else:
             self.S = X.copy()
 
@@ -72,7 +71,7 @@ class Hopfield:
             if (self.S == X).all() and i > 0:  # перевірка зміни виходу з минулої ітерації
                 return {"time": i, "timeout": False, "output":self.S}
             
-            X = self.S
+            X = self.S.copy()
             
         return {"time": i, "timeout": True, "output":self.S}
 
