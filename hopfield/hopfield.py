@@ -36,14 +36,40 @@ class Hopfield:
             for i in order:
                 self.S[i] = self.f(self.S[i], self.S @ self.W[i], q).clip(-1,1) # type: ignore
 
-    def train(self, images: np.ndarray, zeroDiagonal=True):
-        # images = np.array(images, self.np_type)
-        self.W = images.T @ images
-        if zeroDiagonal:
-            np.fill_diagonal(self.W, 0)
-        self.W /= images.shape[1]  # w/=n
-
-        self.S = np.zeros(self.W.shape[0], dtype=self.np_type)
+    def h_strokey(self, v, i, j):
+        sum = 0
+        for k in range(self.W.shape[0]):
+            if k!=i and k!=j: 
+                sum += self.W * self.images[v][k]
+        return sum
+                
+            
+    
+    def train(self, images: np.ndarray, zeroDiagonal=True, method='hebb'):
+        self.images = images
+        n = images.shape[1]
+        m = images.shape[0]
+    
+        self.W = np.zeros((n, n))
+        
+        if method is 'hebb':
+            self.W = images.T @ images
+            if zeroDiagonal:
+                np.fill_diagonal(self.W, 0)
+            self.W /= n 
+            self.S = np.zeros(m, dtype=self.np_type)
+        
+        if method is 'storkey':
+            for v in range(m):
+                for i in range(n):
+                    for j in range(n):
+                        self.W[i, j] += (images[v][i] * images[v][j] 
+                                         - images[v][i] * self.h_strokey(v, j, i)
+                                         - images[v][j] * self.h_strokey(v, i, j)
+                                         )/n
+            
+            
+            
 
     def run(self, X: np.ndarray, time: int = 250, mode="sync", q=None, animate=None, notS=False):
         if q is None:
