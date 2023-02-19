@@ -31,7 +31,7 @@ class Hopfield:
         if mode == "sync":
             self.S = self.f(self.S, self.S @ self.W, q)  # активація нейронів
         else:
-            order = np.arange(float(self.S.shape[0])) # type: ignore
+            order = np.arange(float(self.S.shape[0]), dtype=int) # type: ignore
             np.random.shuffle(order)
             for i in order:
                 self.S[i] = self.f(self.S[i], self.S @ self.W[i], q).clip(-1,1) # type: ignore
